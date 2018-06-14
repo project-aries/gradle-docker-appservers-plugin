@@ -54,7 +54,7 @@ abstract class AbstractFunctionalTest extends Specification {
 
         buildFile << """
             plugins {
-                id 'gradle-docker-database-plugin'
+                id 'gradle-docker-appserver-plugin'
             }
 
             repositories {
