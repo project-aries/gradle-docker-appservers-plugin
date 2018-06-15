@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package com.aries.gradle.docker.database.plugin
+package com.aries.gradle.docker.appserver.plugin
 
 import com.aries.gradle.docker.application.plugin.GradleDockerApplicationPlugin
 import com.aries.gradle.docker.application.plugin.domain.AbstractApplication
+
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 /**
- *  Plugin providing common tasks for starting (*Up), stopping (*Stop), and deleting (*Down) a dockerized database.
+ *  Plugin providing common tasks for starting (*Up), stopping (*Stop), and deleting (*Down) a dockerized application server.
  */
-class GradleDockerDatabasePlugin implements Plugin<Project> {
+class GradleDockerAppServerPlugin implements Plugin<Project> {
 
     @Override
     void apply(final Project project) {
@@ -37,26 +38,20 @@ class GradleDockerDatabasePlugin implements Plugin<Project> {
         final NamedDomainObjectContainer<AbstractApplication> appContainers = project.extensions.getByName(GradleDockerApplicationPlugin.EXTENSION_NAME)
 
         // 3.) create our various dockerized databases
-        createPostgresApplication(appContainers)
+        createTomcatApplication(appContainers)
     }
 
-    // create the default dockerized postgres database
-    private void createPostgresApplication(final NamedDomainObjectContainer<AbstractApplication> appContainers) {
-        appContainers.create('postgres', {
+    // create the default dockerized tomcat application server
+    private void createTomcatApplication(final NamedDomainObjectContainer<AbstractApplication> appContainers) {
+        appContainers.create('tomcat', {
             main {
-                repository = 'postgres'
+                repository = 'tomcat'
                 tag = 'alpine'
                 create {
-                    env = ["CREATED_BY=${GradleDockerDatabasePlugin.class.simpleName}"]
-                }
-                stop {
-                    cmd = ['su', 'postgres', "-c", "/usr/local/bin/pg_ctl stop -m fast"]
-                    successOnExitCodes = [0, 127, 137]
-                    timeout = 60000
-                    probe(60000, 10000)
+                    env = ["CREATED_BY_PLUGIN=${GradleDockerAppServerPlugin.class.simpleName}"]
                 }
                 liveness {
-                    probe(300000, 10000, 'database system is ready to accept connections')
+                    probe(300000, 10000, 'org.apache.catalina.startup.Catalina.start Server startup in')
                 }
             }
         })

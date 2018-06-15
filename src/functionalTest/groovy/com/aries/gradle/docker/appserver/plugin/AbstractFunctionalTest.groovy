@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.aries.gradle.docker.database.plugin
+package com.aries.gradle.docker.appserver.plugin
 
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
@@ -87,7 +87,7 @@ abstract class AbstractFunctionalTest extends Specification {
     }
 
     public static String randomString() {
-        'gddp-' + UUID.randomUUID().toString().replaceAll("-", "")
+        'gdasp-' + UUID.randomUUID().toString().replaceAll("-", "")
     }
 
     /**
