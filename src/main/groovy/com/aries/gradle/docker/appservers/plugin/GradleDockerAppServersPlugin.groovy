@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.aries.gradle.docker.appserver.plugin
+package com.aries.gradle.docker.appservers.plugin
 
 import com.aries.gradle.docker.application.plugin.GradleDockerApplicationPlugin
 import com.aries.gradle.docker.application.plugin.domain.AbstractApplication
@@ -26,7 +26,7 @@ import org.gradle.api.Project
 /**
  *  Plugin providing common tasks for starting (*Up), stopping (*Stop), and deleting (*Down) a dockerized application server.
  */
-class GradleDockerAppServerPlugin implements Plugin<Project> {
+class GradleDockerAppServersPlugin implements Plugin<Project> {
 
     @Override
     void apply(final Project project) {
@@ -46,12 +46,24 @@ class GradleDockerAppServerPlugin implements Plugin<Project> {
         appContainers.create('tomcat', {
             main {
                 repository = 'tomcat'
-                tag = 'alpine'
+                tag = '8.5-alpine'
                 create {
-                    env = ["CREATED_BY_PLUGIN=${GradleDockerAppServerPlugin.class.simpleName}"]
+                    env = ["CREATED_BY_PLUGIN=${GradleDockerAppServersPlugin.class.simpleName}"]
+                    portBindings = [':8080'] // grab a random port to connect to
+                }
+                stop {
+                    cmd = ['catalina.sh', 'stop', '60', 'force']
+                    successOnExitCodes = [0, 137] // cover stopping the container the hard way as well as bringing it down gracefully
+                    timeout = 60000
+                    probe(70000, 10000)
                 }
                 liveness {
                     probe(300000, 10000, 'org.apache.catalina.startup.Catalina.start Server startup in')
+                }
+            }
+            data {
+                create {
+                    volumes = ['/usr/local/tomcat']
                 }
             }
         })
