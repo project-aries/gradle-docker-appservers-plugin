@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.aries.gradle.docker.appserver.plugin
+package com.aries.gradle.docker.appservers.plugin
 
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
@@ -54,7 +54,7 @@ abstract class AbstractFunctionalTest extends Specification {
 
         buildFile << """
             plugins {
-                id 'gradle-docker-appserver-plugin'
+                id 'gradle-docker-appservers-plugin'
             }
 
             repositories {

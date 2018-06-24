@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.aries.gradle.docker.appserver.plugin
+package com.aries.gradle.docker.appservers.plugin
 
 import static java.util.concurrent.TimeUnit.MINUTES
 
