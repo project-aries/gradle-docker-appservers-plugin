@@ -31,6 +31,6 @@ Being based upon the [gradle-docker-application-plugin](https://github.com/proje
 
 The below table lists the currently supported app-servers and their default connection details.
 
-| Type | Commands |
+| Type | Commands/Tasks |
 | :--- | :---: |
 | tomcat | **tomcatUp**, **tomcatStop**, **tomcatDown** |
