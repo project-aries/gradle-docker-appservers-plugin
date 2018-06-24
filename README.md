@@ -22,3 +22,15 @@ buildscript() {
 
 apply plugin: 'gradle-docker-appservers-plugin'
 ```
+
+## Motivation and Design Goals
+
+Being based upon the [gradle-docker-application-plugin](https://github.com/project-aries/gradle-docker-application-plugin) the intent is to create dockerized app-server application definitions for developers to use as they see fit. Be it for desktop use, in a CICD pipeline, or for an arbitrary devops usecase you can easily manage (and customize should the need arise) a pre-defined dockerized app-server with a handful of tasks.
+
+## Supported Databases
+
+The below table lists the currently supported app-servers and their default connection details.
+
+| Type | Commands |
+| :--- | :---: |
+| tomcat | **tomcatUp**, **tomcatStop**, **tomcatDown** |
