@@ -28,28 +28,38 @@ import org.gradle.api.Project
  */
 class GradleDockerAppServersPlugin implements Plugin<Project> {
 
+    public static final String EXTENSION_NAME = 'appservers'
+
     @Override
     void apply(final Project project) {
 
         // 1.) apply required plugins
         project.plugins.apply('gradle-docker-applications-plugin')
 
-        // 2.) get docker-application container
+        // 2.) create plugin extension point
+        final GradleDockerAppServersExtension extensionPoint = project.extensions.create(EXTENSION_NAME, GradleDockerAppServersExtension)
+
+        // 3.) get docker-application container
         final NamedDomainObjectContainer<AbstractApplication> appContainers = project.extensions.getByName(GradleDockerApplicationsPlugin.EXTENSION_NAME)
 
-        // 3.) create our various dockerized databases
-        createTomcatApplication(appContainers)
+        // 4.) create our various dockerized databases
+        createTomcatApplication(appContainers, extensionPoint)
     }
 
     // create the default dockerized tomcat application server
-    private void createTomcatApplication(final NamedDomainObjectContainer<AbstractApplication> appContainers) {
+    private void createTomcatApplication(final NamedDomainObjectContainer<AbstractApplication> appContainers,
+                                         final GradleDockerAppServersExtension extensionPoint) {
+
         appContainers.create('tomcat', {
             main {
                 repository = 'tomcat'
                 tag = '8.5-alpine'
                 create {
                     env = ["CREATED_BY_PLUGIN=${GradleDockerAppServersPlugin.class.simpleName}"]
-                    portBindings = [':8080'] // grab a random port to connect to
+
+                    // if requested use randomPorts otherwise default to main port at 8080
+                    final String hostPort = extensionPoint.randomPorts ? '' : '8080'
+                    portBindings = ["${hostPort}:8080"]
                 }
                 stop {
                     cmd = ['catalina.sh', 'stop', '60', 'force']

@@ -34,6 +34,9 @@ class TomcatFunctionalTest extends AbstractFunctionalTest {
         String uuid = randomString()
         buildFile << """
             
+            appservers {
+                randomPorts()
+            }
             applications {
                 tomcat {
                     id = "${uuid}"
@@ -61,6 +64,7 @@ class TomcatFunctionalTest extends AbstractFunctionalTest {
             result.output.contains('Running exec-stop on container with ID')
             result.output.contains('Removing container with ID')
             result.output.contains('RestartContainer SKIPPED')
+            result.output.contains('8080->8080')
             !result.output.contains('ListImages SKIPPED')
     }
 }
