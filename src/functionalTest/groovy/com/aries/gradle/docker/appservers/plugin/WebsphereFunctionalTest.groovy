@@ -28,7 +28,7 @@ import static java.util.concurrent.TimeUnit.MINUTES
  */
 class WebsphereFunctionalTest extends AbstractFunctionalTest {
 
-    @Timeout(value = 5, unit = MINUTES)
+    @Timeout(value = 10, unit = MINUTES)
     def "Can start, stop, and remove a websphere application stack"() {
 
         String uuid = randomString()
@@ -54,7 +54,7 @@ class WebsphereFunctionalTest extends AbstractFunctionalTest {
         """
 
         when:
-            BuildResult result = build('up')
+            BuildResult result = build('up', 'stop', 'down')
 
         then:
             result.output.contains('is not running or available to inspect')
