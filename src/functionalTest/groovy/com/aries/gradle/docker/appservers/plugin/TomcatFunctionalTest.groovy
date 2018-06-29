@@ -54,7 +54,7 @@ class TomcatFunctionalTest extends AbstractFunctionalTest {
         """
 
         when:
-            BuildResult result = build('up')
+            BuildResult result = build('up', 'stop', 'down')
 
         then:
             result.output.contains('is not running or available to inspect')
