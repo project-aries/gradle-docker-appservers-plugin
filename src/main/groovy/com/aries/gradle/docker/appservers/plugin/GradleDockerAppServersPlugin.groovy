@@ -45,6 +45,7 @@ class GradleDockerAppServersPlugin implements Plugin<Project> {
         // 4.) create our various dockerized appservers
         createTomcatApplication(appContainers, extensionPoint, project)
         createWebsphereApplication(appContainers, extensionPoint, project)
+        createWildflyApplication(appContainers, extensionPoint, project)
     }
 
     // create the default dockerized tomcat application server
@@ -189,6 +190,49 @@ class GradleDockerAppServersPlugin implements Plugin<Project> {
                 create sharedEnvVars
                 create {
                     volumes = ['/opt/IBM/WebSphere']
+                }
+            }
+        })
+    }
+
+    // create the default dockerized websphere application server
+    private void createWildflyApplication(final NamedDomainObjectContainer<AbstractApplication> appContainers,
+                                            final GradleDockerAppServersExtension extensionPoint,
+                                            final Project project) {
+
+        def sharedEnvVars = {
+            env = ["CREATED_BY_PLUGIN=${GradleDockerAppServersPlugin.class.simpleName}"]
+        }
+
+        appContainers.create('wildfly', {
+            main {
+                repository = 'jboss/wildfly'
+                tag = '13.0.0.Final'
+                create sharedEnvVars
+                create {
+                    def hostPort = extensionPoint.randomPorts ? '' : '8080'
+                    def httpsPort = extensionPoint.randomPorts ? '' : '9990'
+                    portBindings = ["${hostPort}:8080", "${httpsPort}:9990"]
+                    exposePorts('tcp', [8080, 9990])
+                    cmd = ['/opt/jboss/wildfly/bin/standalone.sh', '-bmanagement', '0.0.0.0']
+                }
+                exec {
+                    withCommand(['/opt/jboss/wildfly/bin/add-user.sh', 'wildfly', 'wildfly', '--silent'])
+                    successOnExitCodes = [0]
+                    execProbe(60000, 5000)
+                }
+                stop {
+                    timeout = 300000
+                }
+                liveness {
+                    probe(300000, 10000, 'Http management interface listening on')
+                }
+            }
+
+            data {
+                create sharedEnvVars
+                create {
+                    volumes = ['/opt/jboss/wildfly']
                 }
             }
         })
