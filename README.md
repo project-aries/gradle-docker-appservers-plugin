@@ -34,3 +34,5 @@ The below table lists the currently supported app-servers and their default conn
 | Type | Commands/Tasks |
 | :--- | :---: |
 | tomcat | **tomcatUp**, **tomcatStop**, **tomcatDown** |
+| websphere | **websphereUp**, **websphereStop**, **websphereDown** |
+| wildfly | **wildflyUp**, **wildflyStop**, **wildflyDown** |
