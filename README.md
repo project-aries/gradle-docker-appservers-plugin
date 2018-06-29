@@ -31,8 +31,8 @@ Being based upon the [gradle-docker-application-plugin](https://github.com/proje
 
 The below table lists the currently supported app-servers and their default connection details.
 
-| Type | Commands/Tasks |
-| :--- | :---: |
-| tomcat | **tomcatUp**, **tomcatStop**, **tomcatDown** |
-| websphere | **websphereUp**, **websphereStop**, **websphereDown** |
-| wildfly | **wildflyUp**, **wildflyStop**, **wildflyDown** |
+| Type | Admin Username/Password | Tasks |
+| :--- | :--- | :--- |
+| [tomcat](https://hub.docker.com/_/tomcat/) | tomcat/tomcat | **tomcatUp**, **tomcatStop**, **tomcatDown** |
+| [websphere](https://hub.docker.com/r/ibmcom/websphere-traditional/) | wasadmin/wasadmin | **websphereUp**, **websphereStop**, **websphereDown** |
+| [wildfly](https://hub.docker.com/r/jboss/wildfly/) | wildfly/wildfly | **wildflyUp**, **wildflyStop**, **wildflyDown** |
