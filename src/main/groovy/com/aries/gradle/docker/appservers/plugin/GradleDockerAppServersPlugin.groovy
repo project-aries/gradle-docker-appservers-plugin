@@ -43,24 +43,79 @@ class GradleDockerAppServersPlugin implements Plugin<Project> {
         final NamedDomainObjectContainer<AbstractApplication> appContainers = project.extensions.getByName(GradleDockerApplicationsPlugin.EXTENSION_NAME)
 
         // 4.) create our various dockerized appservers
-        createTomcatApplication(appContainers, extensionPoint)
+        createTomcatApplication(appContainers, extensionPoint, project)
         createWebsphereApplication(appContainers, extensionPoint, project)
     }
 
     // create the default dockerized tomcat application server
     private void createTomcatApplication(final NamedDomainObjectContainer<AbstractApplication> appContainers,
-                                         final GradleDockerAppServersExtension extensionPoint) {
+                                         final GradleDockerAppServersExtension extensionPoint,
+                                         final Project project) {
+
+        def sharedCreateClosure = {
+            env = ["CREATED_BY_PLUGIN=${GradleDockerAppServersPlugin.class.simpleName}"]
+        }
 
         appContainers.create('tomcat', {
             main {
                 repository = 'tomcat'
                 tag = '8.5-alpine'
+                create sharedCreateClosure
                 create {
-                    env = ["CREATED_BY_PLUGIN=${GradleDockerAppServersPlugin.class.simpleName}"]
 
                     // if requested use randomPorts otherwise default to main port at 8080
                     def hostPort = extensionPoint.randomPorts ? '' : '8080'
                     portBindings = ["${hostPort}:8080"]
+                }
+                files {
+
+                    // setting default admin user/password
+                    def adminUserClosure = {
+                        if (!project.getBuildDir().exists()) {
+                            if (!project.getBuildDir().mkdirs()) {
+                                throw new GradleException("Unable to create directory @ ${project.getBuildDir().path}")
+                            }
+                        }
+                        def passwordFile = project.file("${project.getBuildDir().path}/tomcat-users.xml")
+                        passwordFile.withWriter { wrt ->
+                            wrt.println('<tomcat-users>')
+                            wrt.println("    <role rolename=\"admin-gui\" /> ")
+                            wrt.println("    <role rolename=\"admin-script\" />")
+                            wrt.println("    <role rolename=\"manager-gui\" />")
+                            wrt.println("    <role rolename=\"manager-status\" />")
+                            wrt.println("    <role rolename=\"manager-gui\" />")
+                            wrt.println("    <role rolename=\"manager-script\" />")
+                            wrt.println("    <role rolename=\"manager-jmx\" />")
+                            wrt.println("    <user username=\"admin\" password=\"admin\" roles=\"admin-gui,admin-script,manager-gui,manager-status,manager-script,manager-jmx\"/>")
+                            wrt.println('</tomcat-users>')
+                        }
+                        passwordFile
+                    }
+                    withFile(adminUserClosure, '/usr/local/tomcat/conf')
+
+                    // allow 'manager' console from outside of container
+                    def remoteHostAccessClosure = {
+                        if (!project.getBuildDir().exists()) {
+                            if (!project.getBuildDir().mkdirs()) {
+                                throw new GradleException("Unable to create directory @ ${project.getBuildDir().path}")
+                            }
+                        }
+
+                        def contextFile = project.file("${project.getBuildDir().path}/webapps/manager/context.xml")
+                        if (!contextFile.parentFile.exists()) {
+                            if (!contextFile.parentFile.mkdirs()) {
+                                throw new GradleException("Unable to create directory @ ${localHostDir.path}")
+                            }
+                        }
+                        contextFile.withWriter { wrt ->
+                            wrt.println("<Context privileged=\"true\" antiResourceLocking=\"false\" docBase=\"\$CATALINA_HOME/webapps/manager\">")
+                            wrt.println("    <Valve className=\"org.apache.catalina.valves.RemoteAddrValve\" allow=\"^.*\$\" />")
+                            wrt.println('</Context>')
+
+                        }
+                        contextFile
+                    }
+                    withFile(remoteHostAccessClosure, '/usr/local/tomcat/webapps/manager/META-INF')
                 }
                 stop {
                     cmd = ['catalina.sh', 'stop', '60', 'force']
@@ -73,6 +128,7 @@ class GradleDockerAppServersPlugin implements Plugin<Project> {
                 }
             }
             data {
+                create sharedCreateClosure
                 create {
                     volumes = ['/usr/local/tomcat']
                 }
@@ -85,14 +141,18 @@ class GradleDockerAppServersPlugin implements Plugin<Project> {
                                             final GradleDockerAppServersExtension extensionPoint,
                                             final Project project) {
 
+        def sharedEnvVars = {
+            env = ["CREATED_BY_PLUGIN=${GradleDockerAppServersPlugin.class.simpleName}",
+                   'UPDATE_HOSTNAME=true']
+            hostName = 'localhost'
+        }
+
         appContainers.create('websphere', {
             main {
                 repository = 'ibmcom/websphere-traditional'
                 tag = '9.0.0.7-profile'
+                create sharedEnvVars
                 create {
-                    env = ["CREATED_BY_PLUGIN=${GradleDockerAppServersPlugin.class.simpleName}",
-                            'UPDATE_HOSTNAME=true']
-
                     def hostPort = extensionPoint.randomPorts ? '' : '9043'
                     def httpsPort = extensionPoint.randomPorts ? '' : '9443'
                     portBindings = ["${hostPort}:9043", "${httpsPort}:9443"]
@@ -124,7 +184,9 @@ class GradleDockerAppServersPlugin implements Plugin<Project> {
                     probe(300000, 10000, 'open for e-business')
                 }
             }
+
             data {
+                create sharedEnvVars
                 create {
                     volumes = ['/opt/IBM/WebSphere']
                 }
