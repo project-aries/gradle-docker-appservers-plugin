@@ -25,7 +25,7 @@ apply plugin: 'gradle-docker-appservers-plugin'
 
 ## Motivation and Design Goals
 
-Being based upon the [gradle-docker-application-plugin](https://github.com/project-aries/gradle-docker-application-plugin) the intent is to create dockerized app-server application definitions for developers to use as they see fit. Be it for desktop use, in a CICD pipeline, or for an arbitrary devops usecase you can easily manage (and customize should the need arise) a pre-defined dockerized app-server with a handful of tasks.
+Being based upon the [gradle-docker-applications-plugin](https://github.com/project-aries/gradle-docker-applications-plugin) the intent is to create pre-defined dockerized app-server application(s) for developers to use as they see fit. Be it for desktop use, in a CICD pipeline, or for an arbitrary devops usecase you can easily manage (and customize should the need arise) a dockerized app-server with a handful of tasks.
 
 ## Supported Databases
 
