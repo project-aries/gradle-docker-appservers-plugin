@@ -54,7 +54,7 @@ class GradleDockerAppServersPlugin implements Plugin<Project> {
                                          final Project project) {
 
         def sharedCreateClosure = {
-            env = ["CREATED_BY_PLUGIN=${GradleDockerAppServersPlugin.class.simpleName}"]
+            envVars << ['CREATED_BY_PLUGIN' : "${GradleDockerAppServersPlugin.class.simpleName}"]
         }
 
         appContainers.create('tomcat', {
@@ -122,10 +122,10 @@ class GradleDockerAppServersPlugin implements Plugin<Project> {
                     cmd = ['catalina.sh', 'stop', '60', 'force']
                     successOnExitCodes = [0, 137] // cover stopping the container the hard way as well as bringing it down gracefully
                     timeout = 60000
-                    probe(70000, 10000)
+                    execStopProbe(70000, 10000)
                 }
                 liveness {
-                    probe(300000, 10000, 'org.apache.catalina.startup.Catalina.start Server startup in')
+                    livenessProbe(300000, 10000, 'org.apache.catalina.startup.Catalina.start Server startup in')
                 }
             }
             data {
@@ -143,8 +143,8 @@ class GradleDockerAppServersPlugin implements Plugin<Project> {
                                             final Project project) {
 
         def sharedEnvVars = {
-            env = ["CREATED_BY_PLUGIN=${GradleDockerAppServersPlugin.class.simpleName}",
-                   'UPDATE_HOSTNAME=true']
+            envVars << ['CREATED_BY_PLUGIN' : "${GradleDockerAppServersPlugin.class.simpleName}",
+                   'UPDATE_HOSTNAME' : 'true']
             hostName = 'localhost'
         }
 
@@ -182,7 +182,7 @@ class GradleDockerAppServersPlugin implements Plugin<Project> {
                     timeout = 120000
                 }
                 liveness {
-                    probe(300000, 10000, 'open for e-business')
+                    livenessProbe(300000, 10000, 'open for e-business')
                 }
             }
 
@@ -201,7 +201,7 @@ class GradleDockerAppServersPlugin implements Plugin<Project> {
                                             final Project project) {
 
         def sharedEnvVars = {
-            env = ["CREATED_BY_PLUGIN=${GradleDockerAppServersPlugin.class.simpleName}"]
+            envVars << ['CREATED_BY_PLUGIN' : "${GradleDockerAppServersPlugin.class.simpleName}"]
         }
 
         appContainers.create('wildfly', {
@@ -225,7 +225,7 @@ class GradleDockerAppServersPlugin implements Plugin<Project> {
                     timeout = 300000
                 }
                 liveness {
-                    probe(300000, 10000, 'Http management interface listening on')
+                    livenessProbe(300000, 10000, 'Http management interface listening on')
                 }
             }
 

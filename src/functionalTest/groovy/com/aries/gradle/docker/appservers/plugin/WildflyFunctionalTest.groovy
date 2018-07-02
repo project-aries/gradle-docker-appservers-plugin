@@ -54,13 +54,13 @@ class WildflyFunctionalTest extends AbstractFunctionalTest {
         """
 
         when:
-            BuildResult result = build('up')
+            BuildResult result = build('up', 'stop', 'down')
 
         then:
             result.output.contains('is not running or available to inspect')
             result.output.contains('Inspecting container with ID')
             result.output.contains('Created container with ID')
-            result.output.contains('Starting liveness probe on container')
+            result.output.contains('Starting liveness')
             result.output.contains('Running exec-stop on container with ID')
             result.output.contains('Removing container with ID')
             result.output.contains('RestartContainer SKIPPED')
